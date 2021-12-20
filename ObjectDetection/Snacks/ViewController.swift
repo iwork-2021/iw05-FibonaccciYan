@@ -190,30 +190,47 @@ class ViewController: UIViewController {
           print("I Found Nothing!")
           return
       }
-      for i in predictions {
+      for i in 0..<predictions.count {
           DispatchQueue.main.sync(execute: {
-              let resultBoundingBoxView = BoundingBoxView()
-              let identifier = i.labels.first!.identifier
-              let confidence = i.labels.first!.confidence
+              let resultBoundingBox = predictions[i].boundingBox
+              let identifier = predictions[i].labels.first!.identifier
+              let confidence = predictions[i].labels.first!.confidence
+              let boundingBoxView = self.boundingBoxViews[i]
               
               if confidence < 0.8 {
                   return
               }
               
-              resultBoundingBoxView.show(
-                frame: VNImageRectForNormalizedRect(
-                    i.boundingBox,
-                    CVPixelBufferGetWidth(self.currentBuffer!),
-                    CVPixelBufferGetHeight(self.currentBuffer!)
-                ),
-                label: identifier + ":\(confidence * 100)%",
-                color: colors[identifier]!
+              let width = UIScreen.main.bounds.width
+              let height = UIScreen.main.bounds.height
+              let scale = CGAffineTransform.identity.scaledBy(x: width, y: height)
+              let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -height)
+              let rect = resultBoundingBox.applying(scale).applying(transform)
+              
+              boundingBoxView.show(
+                frame: rect,
+//                    CGRect(
+//                    x: CGFloat(resultBoundingBox.minX) * CGFloat(UIScreen.main.bounds.width),
+//                    y: CGFloat(resultBoundingBox.minY) * CGFloat(UIScreen.main.bounds.height),
+//                    width: CGFloat(resultBoundingBox.width) * CGFloat(UIScreen.main.bounds.width),
+//                    height: CGFloat(resultBoundingBox.height) * CGFloat(UIScreen.main.bounds.height)
+//                ),
+                label: identifier + ":\((confidence * 100).roundTo(places:2))%",
+                color: self.colors[identifier]!
               )
-              resultBoundingBoxView.addToLayer(self.videoPreview.layer)
-              self.videoPreview.layer.layoutSublayers()
+//              resultBoundingBoxView.addToLayer(self.videoPreview.layer)
+//              self.videoPreview.layer.layoutSublayers()
           })
           
       }
+      
+      sleep(1)
+          
+      DispatchQueue.main.sync(execute: {
+          for j in 0..<self.maxBoundingBoxViews{
+              self.boundingBoxViews[j].hide()
+          }
+      })
   }
 }
 
@@ -221,4 +238,11 @@ extension ViewController: VideoCaptureDelegate {
   func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame sampleBuffer: CMSampleBuffer) {
     predict(sampleBuffer: sampleBuffer)
   }
+}
+
+extension Float {
+    func roundTo(places:Int) -> Float {
+        let divisor = pow(10.0, Float(places))
+        return (self * divisor).rounded() / divisor
+    }
 }
