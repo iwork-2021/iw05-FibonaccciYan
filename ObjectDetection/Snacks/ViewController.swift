@@ -181,10 +181,40 @@ class ViewController: UIViewController {
 
   func processObservations(for request: VNRequest, error: Error?) {
     //call show function
+      show(predictions: request.results as! [VNRecognizedObjectObservation])
   }
 
   func show(predictions: [VNRecognizedObjectObservation]) {
    //process the results, call show function in BoundingBoxView
+      guard predictions.isEmpty == false else {
+          print("I Found Nothing!")
+          return
+      }
+      for i in predictions {
+          DispatchQueue.main.sync(execute: {
+              let resultBoundingBoxView = BoundingBoxView()
+              let identifier = i.labels.first!.identifier
+              let confidence = i.labels.first!.confidence
+              
+              if confidence < 0.8 {
+                  return
+              }
+              
+              resultBoundingBoxView.show(
+                frame: VNImageRectForNormalizedRect(
+                    i.boundingBox,
+                    CVPixelBufferGetWidth(self.currentBuffer!),
+                    CVPixelBufferGetHeight(self.currentBuffer!)
+                ),
+                label: identifier + ":\(confidence * 100)%",
+                color: colors[identifier]!
+              )
+              resultBoundingBoxView.addToLayer(self.videoPreview.layer)
+              self.videoPreview.layer.layoutSublayers()
+          })
+          
+      }
+  }
 }
 
 extension ViewController: VideoCaptureDelegate {

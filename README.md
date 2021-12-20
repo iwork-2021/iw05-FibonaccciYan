@@ -2,7 +2,7 @@
 # iw05
 iOS assignment 5: Object Detection App.
 
-作业 4-1 
+作业 5 
   请基于模板工程(ObjectDetection)，运用CoreML开发一个利用TinyYOLO进行目标检测的iOS App。
 
 功能要求如下：
@@ -22,12 +22,12 @@ iOS assignment 5: Object Detection App.
 
 1. 安装conda（可以通过pip install）
 
-2. 安装conda环境：turienv.yaml是conda环境需求文件，通过一下命令安装环境
+2. 安装conda环境：turienv.yaml是conda环境需求文件，通过以下命令安装环境
 ```python
 conda env create -f turienv.yaml
 ```
 3. 安装jupyter notebook
-  
+
   通过conda安装
   ```python
   conda install -c conda-forge notebook
@@ -40,5 +40,5 @@ conda env create -f turienv.yaml
   ```terminal
   jupyter notebook
   ```
-  
+
 4. 执行tinyYOLO.ipynb
